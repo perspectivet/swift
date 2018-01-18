@@ -5,13 +5,13 @@ package swift_test
 
 import (
 	"fmt"
-
-	"github.com/ncw/swift"
+	"."
+//	"github.com/xlucas/swift"
 )
 
 func ExampleConnection() {
 	// Create a v1 auth connection
-	c := swift.Connection{
+	var c = swift.Connection{
 		// This should be your username
 		UserName: "user",
 		// This should be your api key

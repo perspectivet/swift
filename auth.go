@@ -42,6 +42,10 @@ func newAuth(c *Connection) (Authenticator, error) {
 		}
 	}
 	switch AuthVersion {
+	case -1:
+		return &nilAuth{
+			storageUrl: c.StorageUrl,
+		}, nil
 	case 1:
 		return &v1Auth{}, nil
 	case 2:

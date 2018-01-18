@@ -87,6 +87,8 @@ const (
 type Connection struct {
 	// Parameters - fill these in before calling Authenticate
 	// They are all optional except UserName, ApiKey and AuthUrl
+	// For public buckets with no authentication UserName, ApiKey and AuthUrl are optional
+	// but StorageUrl is not
 	Domain         string            // User's domain name
 	DomainId       string            // User's domain Id
 	UserName       string            // UserName for api
@@ -399,7 +401,11 @@ func (c *Connection) Authenticated() bool {
 //
 // Call with authLock held
 func (c *Connection) authenticated() bool {
-	return c.StorageUrl != "" && c.AuthToken != ""
+	if c.AuthVersion == -1 {
+		return true
+	} else {
+		return c.StorageUrl != "" && c.AuthToken != ""
+	}
 }
 
 // SwiftInfo contains the JSON object returned by Swift when the /info
@@ -982,9 +988,11 @@ func (c *Connection) Account() (info Account, headers Headers, err error) {
 		ErrorMap:   ContainerErrorMap,
 		NoResponse: true,
 	})
+
 	if err != nil {
 		return
 	}
+
 	// Parse the headers into a dict
 	//
 	//    {'Accept-Ranges': 'bytes',

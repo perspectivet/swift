@@ -30,8 +30,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ncw/swift"
-	"github.com/ncw/swift/swifttest"
+	"."
+	"./swifttest"
+//	"github.com/xlucas/swift"
+//	"github.com/xlucas/swift/swifttest"
 )
 
 var (
@@ -75,7 +77,7 @@ func makeConnection() (*swift.Connection, error) {
 		if srv != nil {
 			srv.Close()
 		}
-		srv, err = swifttest.NewSwiftServer("localhost")
+		srv, err = swifttest.NewSwiftServer("localhost", false)
 		if err != nil {
 			return nil, err
 		}
@@ -1028,7 +1030,7 @@ func TestObjectNamesAllWithLimit(t *testing.T) {
 
 func TestObjectsWalk(t *testing.T) {
 	objects := make([]string, 0)
-	err := c.ObjectsWalk(container, nil, func(opts *swift.ObjectsOpts) (interface{}, error) {
+	err := c.ObjectsWalk(CONTAINER, nil, func(opts *swift.ObjectsOpts) (interface{}, error) {
 		newObjects, err := c.ObjectNames(CONTAINER, opts)
 		if err == nil {
 			objects = append(objects, newObjects...)

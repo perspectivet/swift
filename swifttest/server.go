@@ -31,7 +31,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ncw/swift"
+//	"github.com/ncw/swift"
+	".."
 )
 
 const (
@@ -48,6 +49,7 @@ type SwiftServer struct {
 	URL      string
 	Accounts map[string]*account
 	Sessions map[string]*session
+	PublicContainer bool
 }
 
 // The Folder type represents a container stored in an account
@@ -648,6 +650,9 @@ func (s *SwiftServer) serveHTTP(w http.ResponseWriter, req *http.Request) {
 
 	var resp interface{}
 
+	//don't check credentials and headers if we're doing a public container test
+
+	if ! s.PublicContainer {
 	if req.URL.String() == "/v1.0" {
 		username := req.Header.Get("x-auth-user")
 		key := req.Header.Get("x-auth-key")
@@ -679,7 +684,6 @@ func (s *SwiftServer) serveHTTP(w http.ResponseWriter, req *http.Request) {
 		})
 		return
 	}
-
 	r = s.resourceForURL(req.URL)
 
 	key := req.Header.Get("x-auth-token")
@@ -713,6 +717,8 @@ func (s *SwiftServer) serveHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 
 		a.user = s.Accounts[session.username]
+	}
+
 	}
 
 	switch req.Method {
@@ -893,7 +899,7 @@ func (rootResource) delete(a *action) interface{} {
 
 func (rootResource) copy(a *action) interface{} { return notAllowed() }
 
-func NewSwiftServer(address string) (*SwiftServer, error) {
+func NewSwiftServer(address string, publicContainer bool) (*SwiftServer, error) {
 	var (
 		l   net.Listener
 		err error
@@ -919,6 +925,7 @@ func NewSwiftServer(address string) (*SwiftServer, error) {
 		URL:      "http://" + l.Addr().String() + "/v1",
 		Accounts: make(map[string]*account),
 		Sessions: make(map[string]*session),
+		PublicContainer: publicContainer,
 	}
 
 	server.Accounts[TEST_ACCOUNT] = &account{
