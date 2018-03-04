@@ -1,6 +1,8 @@
 package swift
 
 import (
+	debug "runtime/debug"
+	"fmt"
 	"bytes"
 	"encoding/json"
 	"net/http"
@@ -29,6 +31,8 @@ type Authenticator interface {
 //
 // A hint for AuthVersion can be provided
 func newAuth(c *Connection) (Authenticator, error) {
+	debug.PrintStack()
+	fmt.Printf("selecting newAuth")
 	AuthVersion := c.AuthVersion
 	if AuthVersion == 0 {
 		if strings.Contains(c.AuthUrl, "v3") {
@@ -43,12 +47,15 @@ func newAuth(c *Connection) (Authenticator, error) {
 	}
 	switch AuthVersion {
 	case -1:
+		fmt.Printf("selecting nilAuth")
 		return &nilAuth{
 			storageUrl: c.StorageUrl,
 		}, nil
 	case 1:
+		fmt.Printf("selecting v1Auth")
 		return &v1Auth{}, nil
 	case 2:
+		fmt.Printf("selecting v2Auth")
 		return &v2Auth{
 			// Guess as to whether using API key or
 			// password it will try both eventually so
@@ -56,6 +63,7 @@ func newAuth(c *Connection) (Authenticator, error) {
 			useApiKey: len(c.ApiKey) >= 32,
 		}, nil
 	case 3:
+		fmt.Printf("selecting v3Auth")
 		return &v3Auth{}, nil
 	}
 	return nil, newErrorf(500, "Auth Version %d not supported", AuthVersion)
@@ -88,6 +96,8 @@ func (auth *v1Auth) Response(resp *http.Response) error {
 
 // v1 Authentication - read storage url
 func (auth *v1Auth) StorageUrl(Internal bool) string {
+	debug.PrintStack()
+	fmt.Printf("StorageUrl(...)")
 	storageUrl := auth.Headers.Get("X-Storage-Url")
 	if Internal {
 		newUrl, err := url.Parse(storageUrl)

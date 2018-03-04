@@ -11,10 +11,12 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"log"
 	"mime"
 	"net/http"
 	"net/url"
 	"path"
+//	debug "runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
@@ -463,6 +465,9 @@ type RequestOpts struct {
 //
 // This method is exported so extensions can call it.
 func (c *Connection) Call(targetUrl string, p RequestOpts) (resp *http.Response, headers Headers, err error) {
+//	log.Printf("DEBUG: Call(Container:%v,ObjectName:%v,Operation:%v,targetUrl:%v)", p.Container, p.ObjectName, p.Operation, targetUrl)
+//	debug.PrintStack()
+
 	c.authLock.Lock()
 	c.setDefaults()
 	c.authLock.Unlock()
@@ -528,8 +533,10 @@ func (c *Connection) Call(targetUrl string, p RequestOpts) (resp *http.Response,
 			}
 			return nil, nil, err
 		}
-		// Check to see if token has expired
-		if resp.StatusCode == 401 && retries > 0 {
+
+		// Check to see if we are using a non-nil Authenticator and if the token has expired
+		if c.AuthVersion > -1 && resp.StatusCode == 401 && retries > 0 {
+//			log.Printf("DEBUG: Token Expired (response:%v,retries:%v)", resp, retries)
 			_ = resp.Body.Close()
 			c.UnAuthenticate()
 			retries--

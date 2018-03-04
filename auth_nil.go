@@ -1,6 +1,8 @@
 package swift
 
 import (
+	"fmt"
+	debug "runtime/debug"
 	"net/http"
 )
 
@@ -19,6 +21,8 @@ func (auth *nilAuth) Response(resp *http.Response) error {
 
 // v1 Authentication - read storage url
 func (auth *nilAuth) StorageUrl(Internal bool) string {
+	debug.PrintStack()
+	fmt.Printf("StorageUrl(...)")
 	return auth.storageUrl
 }
 
