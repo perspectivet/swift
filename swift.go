@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"log"
+//	"log"
 	"mime"
 	"net/http"
 	"net/url"
